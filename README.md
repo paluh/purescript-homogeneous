@@ -1,6 +1,6 @@
 # purescript-homogeneous
 
-This library exploits the underling representation of `Record` a bit to provide convenient instances when they are homogeneous.
+This library exploits the underling representation of the `Record` (`Variant` comming soon ;-)) to provide convenient instances when they are homogeneous.
 
 ## `Data.Homogeneous.Record`
 
@@ -10,7 +10,7 @@ The core type is:
 newtype Homogeneous (row ∷ # Type) a = Homogeneous (Object a)
 ```
 
-`row` only provides information about the structure of the given `Record` (we put `Unit` as a placeholder for values) but `a` is the underling type of values in it.
+`row` only provides information about the structure of a `Record` (we put `Unit` as a placeholder for values) but `a` is the underling type of values in it.
 
 Given the above we can provide (by mainly newtype derving from the `Object`) many instances for this type like: `Traversable`, `Foldable`, `Monoid`. There is also `Applicative` (which is isomorphic to the instance from `sized-vectors`) which allows us to do:
 
