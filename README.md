@@ -49,5 +49,5 @@ The core type is:
 newtype Homogeneous (row ∷ # Type) a = Homogeneous (VariantRep a)
 ```
 
-What this types gives us is a `Comonad` instance which allows us to `extract` `a` value from any homogeneous `Variant` easily. Additionally we have extend which together with `toVariant` can be probably useful.
+What this types gives us is a `Comonad` instance which allows us to `extract` `a` value from any homogeneous `Variant` easily. Additionally we have `extend` which together with `map` and `toVariant` can be probably useful to simplify repeated chain operations on a given variant.
 
