@@ -7,10 +7,10 @@ This library exploits the underling representation of the `Record` (`Variant` co
 The core type is:
 
 ```purescript
-newtype Homogeneous (row ∷ # Type) a = Homogeneous (Object a)
+newtype Homogeneous (row ∷ # Type) a = Homogeneous (Foreign.Object a)
 ```
 
-`row` only provides information about the structure of a `Record` but `a` is the underling type of the values in it.
+`row` only provides information about the structure of a `Record` but `a` is the underling type of the values in it. "Smart construction" is done by `Foreign.Object.fromHomogeneous` which is just `unsafeCoerce` underneath. Deconstruction (`Record.Homogeneous.toRecord`) is yet another safe `unsafeCoerce` alias :-P
 
 Given the above we can provide (by mainly newtype derving from the `Object`) many instances for this type like: `Traversable`, `Foldable`, `Monoid`. There is also an `Applicative` instance (which is isomorphic to the instance from `sized-vectors`) which allows us to do:
 
@@ -38,4 +38,4 @@ which outputs:
 { one: 2, three: 6, two: 4 }
 ```
 
-What is quite nice about this `newtype` approach is that underling machinery for deriving all instances is really simple and efficient :-) Additionally it seems that it can be also complemented by `Homogeneous.Variant` in the future...
+What is quite a nice about this `newtype` approach is that underling machinery for deriving all instances is really simple and efficient :-) Additionally it seems that it can be complemented by `Homogeneous.Variant` in the future...
