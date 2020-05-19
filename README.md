@@ -39,3 +39,15 @@ which outputs:
 ```
 
 What is quite a nice about this `newtype` approach is that underling machinery for deriving all instances is really simple and efficient :-) Additionally it seems that it can be complemented by `Homogeneous.Variant` in the future...
+
+
+## `Data.Homogeneous.Variant`
+
+The core type is:
+
+```purescript
+newtype Homogeneous (row ∷ # Type) a = Homogeneous (VariantRep a)
+```
+
+What this types gives us is a `Comonad` instance which allows us to `extract` `a` value from any homogeneous `Variant` easily. Additionally we have extend which together with `toVariant` can be probably useful.
+
