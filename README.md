@@ -1,6 +1,6 @@
 # purescript-homogeneous
 
-This library exploits the underling representation of the `Record` (`Variant` comming soon ;-)) to provide convenient instances when they are homogeneous.
+This library exploits the underling representation of the `Record` (`Variant` comming soon ;-)) to provide convenient instances when it is homogeneous.
 
 ## `Data.Homogeneous.Record`
 
