@@ -42,18 +42,24 @@ instance applicativeHomogeneousRecord ∷ (Record.Extra.Keys rl, RowToList r rl)
 derive newtype instance foldableHomogeneous ∷ Foldable (Homogeneous r)
 derive newtype instance traversableHomogeneous ∷ Traversable (Homogeneous r)
 derive newtype instance semigroupHomogeneous ∷ Semigroup a ⇒ Semigroup (Homogeneous r a)
-derive newtype instance monoidHomogeneous ∷ Monoid a ⇒ Monoid (Homogeneous r a)
+instance monoidHomogeneous ∷ (Record.Extra.Keys rl, RowToList r rl, Monoid a) ⇒ Monoid (Homogeneous r a) where
+  mempty = pure mempty
 
 type MapRowConst a = Type.Eval.ToRow <<< Type.Eval.Map (Type.Eval.Const a) <<< Type.Eval.FromRow
 
-type ConstRow a r r' t = Type.Eval.Eval (MapRowConst a (Row.RProxy r)) (Row.RProxy r') ⇒ t
+class Type.Eval.Eval (MapRowConst a (Row.RProxy r)) (Row.RProxy r') ⇐ ConstRow a r r'
 
 homogeneous
   ∷ ∀ a r r'
-  . (Row.Homogeneous r a)
-  ⇒ ConstRow Unit r r' ({ | r } → Homogeneous r' a)
+  . Row.Homogeneous r a
+  ⇒ ConstRow Unit r r'
+  ⇒ Type.Eval.Eval (MapRowConst a (Row.RProxy r)) (Row.RProxy r')
+  ⇒ { | r }
+  → Homogeneous r' a
 homogeneous = Homogeneous <<< Object.fromHomogeneous
 
 toRecord
-  ∷ ∀ a r r'. ConstRow a r r' ((Homogeneous r a) → { | r'})
+  ∷ ∀ a r r'
+  . ConstRow a r r'
+  ⇒ ((Homogeneous r a) → { | r'})
 toRecord (Homogeneous obj) = unsafeCoerce obj
