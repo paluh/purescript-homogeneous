@@ -48,7 +48,7 @@ recordInstances = do
 
 ```
 
-To use instances from `Homogeneous.Record` we need to wrap our record with a `newtype` with `homogeneous` function. To go back we unwrap it using `toRecord`:
+To use instances from `Homogeneous.Record` we need to wrap our record using a smart constructor `homogeneous`. To go back we unwrap it using `toRecord`. Both the functions are really "cheap" underneath.
 
 ```purescript
     hr = Homogeneous.Record.homogeneous r
