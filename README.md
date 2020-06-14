@@ -27,7 +27,6 @@ import Control.Comonad (extract, (=>>))
 import Control.Semigroupoid (composeFlipped)
 import Data.Homogeneous.Record (homogeneous, toRecord)
 import Data.Homogeneous.Record (homogeneous, toRecord) as Homogeneous.Record
--- import Data.Homogeneous.Variant (homogeneous, toVariant) as Homogeneous.Variant
 import Data.Variant (Variant, case_, on)
 import Data.Variant (inj) as Variant
 import Effect (Effect)
@@ -54,10 +53,8 @@ To use instances from `Homogeneous.Record` we need to wrap our record with a `ne
 ```purescript
     hr = Homogeneous.Record.homogeneous r
 
-    -- | We put a record in
     o = multiply <*> hr
 
-    -- | We get a record back
     r' = Homogeneous.Record.toRecord o
 
   assert (r' == { one: 2, two: 4, three: 6 })
