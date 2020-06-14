@@ -25,9 +25,9 @@ instance extendHomogeneous ∷ Extend (Homogeneous r) where
 instance comonad ∷ Comonad (Homogeneous r) where
   extract (Homogeneous (VariantRep r)) = r.value
 
-homogeneous ∷ ∀ a ra ru. Fill Unit ra ru ⇒ (Variant ra → Homogeneous ru a)
+homogeneous ∷ ∀ a ra rv. Fill Void ra rv ⇒ (Variant ra → Homogeneous rv a)
 homogeneous = Homogeneous <<< unsafeCoerce
 
-toVariant ∷ ∀ a ra ru. Fill a ra ru ⇒ Homogeneous ru a → Variant ra
+toVariant ∷ ∀ a ra rv. Fill a ra rv ⇒ Homogeneous rv a → Variant ra
 toVariant (Homogeneous v) = unsafeCoerce v
 

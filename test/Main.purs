@@ -2,16 +2,7 @@ module Test.Main where
 
 import Prelude
 
-import Control.Comonad (extract, (=>>))
-import Control.Semigroupoid (composeFlipped)
-import Data.Homogeneous.Record (homogeneous, toRecord)
-import Data.Homogeneous.Record (homogeneous, toRecord) as Homogeneous.Record
-import Data.Homogeneous.Variant (homogeneous, toVariant) as Homogeneous.Variant
-import Data.Variant (Variant, case_, on)
-import Data.Variant (inj) as Variant
 import Effect (Effect)
-import Effect.Console (logShow)
-import Type.Prelude (SProxy(..))
 import Test.README (recordInstances)
 
 main :: Effect Unit

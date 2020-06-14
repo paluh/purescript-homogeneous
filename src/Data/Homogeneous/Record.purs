@@ -42,33 +42,33 @@ instance monoidHomogeneous ∷ (Record.Extra.Keys rl, RowToList r rl, Monoid a) 
   mempty = pure mempty
 
 homogeneous
-  ∷ ∀ a ra ru
+  ∷ ∀ a ra rv
   . Row.Homogeneous ra a
-  ⇒ Fill Unit ra ru
+  ⇒ Fill Void ra rv
   ⇒ { | ra }
-  → Homogeneous ru a
+  → Homogeneous rv a
 homogeneous = Homogeneous <<< Object.fromHomogeneous
 
 toRecord
-  ∷ ∀ a ra ru
-  . Fill a ru ra
-  ⇒ Homogeneous ru a
+  ∷ ∀ a ra rv
+  . Fill a rv ra
+  ⇒ Homogeneous rv a
   → { | ra }
 toRecord (Homogeneous obj) = unsafeCoerce obj
 
 get
-  ∷ ∀ a ra ru
-  . Fill a ru ra
-  ⇒ Homogeneous ru a
+  ∷ ∀ a ra rv
+  . Fill a rv ra
+  ⇒ Homogeneous rv a
   → ({ | ra } → a)
   → a
 get h f = f (toRecord h)
 
 modify
-  ∷ ∀ a ra ru. Row.Homogeneous ra a
-  ⇒ Fill Unit ra ru
-  ⇒ Fill a ru ra
-  ⇒ Homogeneous ru a
+  ∷ ∀ a ra rv. Row.Homogeneous ra a
+  ⇒ Fill Void ra rv
+  ⇒ Fill a rv ra
+  ⇒ Homogeneous rv a
   → ({ | ra } → { | ra })
-  → Homogeneous ru a
+  → Homogeneous rv a
 modify h f = homogeneous (f (toRecord h))
