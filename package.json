@@ -1,0 +1,31 @@
+{
+  "name": "purescript-homogeneous",
+  "version": "0.0.1",
+  "description": "Handy instances for homogeneous variants and records",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "pretest": "paluh-litps compile --file README.md; mv README.purs test/README.purs",
+    "test": "spago test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paluh/purescript-homogeneous.git"
+  },
+  "keywords": [
+    "record",
+    "variant",
+    "purescript"
+  ],
+  "author": "Tomasz Rybarczyk (aka paluh)",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/paluh/purescript-homogeneous/issues"
+  },
+  "homepage": "https://github.com/paluh/purescript-homogeneous#readme",
+  "devDependencies": {
+    "paluh-litps": "^0.1.4"
+  }
+}
