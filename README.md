@@ -45,7 +45,6 @@ import Prelude
 import Control.Comonad (extract, (=>>))
 import Control.Semigroupoid (composeFlipped)
 import Data.Homogeneous.Record (homogeneous, toRecord)
-import Data.Homogeneous.Record (homogeneous, toRecord) as Homogeneous.Record
 import Data.Variant (Variant, case_, on)
 import Data.Variant (inj) as Variant
 import Effect (Effect)
@@ -70,11 +69,11 @@ recordInstances = do
 To use instances from `Homogeneous.Record` we need to wrap our record using a smart constructor `homogeneous`. To go back we unwrap it using `toRecord`. Both functions are really "cheap" underneath.
 
 ```purescript
-    hr = Homogeneous.Record.homogeneous r
+    hr = homogeneous r
 
     o = multiply <*> hr
 
-    r' = Homogeneous.Record.toRecord o
+    r' = toRecord o
 
   assert (r' == { one: 2, two: 4, three: 6 })
 ```
@@ -83,7 +82,7 @@ Of course we have others instances at hand too:
 
 ```purescript
   assert
-    ((Homogeneous.Record.toRecord <<< map show $ hr) == { one: "1", two: "2", three: "3" })
+    ((toRecord $ map show hr) == { one: "1", two: "2", three: "3" })
 ```
 
 What is quite a nice about this `newtype` approach is that underling machinery (we deriving nearly all instances) is really simple and efficient based on `Foreign.Object`.
