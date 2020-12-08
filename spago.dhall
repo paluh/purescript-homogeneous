@@ -10,7 +10,6 @@ You can edit this file as you like.
     , "foreign-object"
     , "psci-support"
     , "record-extra"
-    , "typelevel-eval"
     , "variant"
     ]
 , name = "homogeneous"

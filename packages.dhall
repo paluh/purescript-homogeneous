@@ -123,12 +123,6 @@ let upstream =
 
 let overrides = {=}
 
-let additions =
-  { typelevel-eval =
-      { dependencies = [ "leibniz", "typelevel-prelude", "tuples", "prelude", "unsafe-coerce" ]
-      , repo = "https://github.com/natefaubion/purescript-typelevel-eval.git"
-      , version = "master"
-      }
-  }
+let additions = {=}
 
 in  upstream // overrides // additions
