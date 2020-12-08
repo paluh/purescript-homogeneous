@@ -44,6 +44,7 @@ import Prelude
 
 import Control.Comonad (extract, (=>>))
 import Control.Semigroupoid (composeFlipped)
+import Data.Array (head) as Array
 import Data.Homogeneous.Record (homogeneous, toRecord)
 import Data.Homogeneous.Record (homogeneous, toRecord) as Homogeneous.Record
 import Data.Variant (Variant, case_, on)
@@ -77,6 +78,7 @@ To use instances from `Homogeneous.Record` we need to wrap our record using a sm
     r' = Homogeneous.Record.toRecord o
 
   assert (r' == { one: 2, two: 4, three: 6 })
+
 ```
 
 Of course we have others instances at hand too:
@@ -97,5 +99,28 @@ The core type is:
   newtype Homogeneous (row ∷ # Type) a = Homogeneous (VariantRep a)
   ```
 
-What this types gives us is a `Comonad` instance which allows us to `extract` `a` value from any homogeneous `Variant` easily. Additionally we have `extend` which together with `map` and `toVariant` can be probably useful to simplify repeated chain operations on a given variant.
+What this type gives us is a `Comonad` instance which allows us to `extract` `a` value from any homogeneous `Variant` easily. Additionally we have `extend` which together with `map` and `toVariant` can be probably useful to simplify repeated chain operations on a given variant.
 
+
+<!--
+-- ```purescript
+-- type TrianglePoint = Variant (p1 ∷ { x ∷ Number, y ∷ Number }, p2 ∷ String)
+-- 
+-- variantInstances ∷ Effect Unit
+-- variantInstances = do
+--   let
+--     -- mul' = composeFlipped Homogeneous.Variant.toVariant $ case_
+--     --   # on (SProxy ∷ SProxy "one") (mul 1)
+--     --   # on (SProxy ∷ SProxy "two") (mul 2)
+-- 
+--     o = Homogeneous.Variant.homogeneous ((Variant.inj (SProxy ∷ SProxy "one") 1) ∷ Numbers
+--     t = Homogeneous.Variant.homogeneous ((Variant.inj (SProxy ∷ SProxy "two") 2) ∷ Variant (two ∷ Int, one ∷ Int))
+-- 
+--     t' = t =>> mul'
+--     o' = o =>> mul'
+-- 
+--   logShow $ extract t'
+--   logShow $ extract o'
+-- ```
+-- 
+-->

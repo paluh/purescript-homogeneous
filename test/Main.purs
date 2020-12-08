@@ -2,23 +2,20 @@ module Test.Main where
 
 import Prelude
 
+import Data.Array (head) as Array
+import Data.Homogeneous.Record (homogeneous) as Record
+import Data.Homogeneous.Record (toRecord)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
+import Test.Assert (assert)
 import Test.README (recordInstances)
 
 main :: Effect Unit
 main = do
-  recordInstances
+  let
+    recHeads rec = toRecord (map Array.head (Record.homogeneous rec))
 
---   let
---     mul' = composeFlipped Homogeneous.Variant.toVariant $ case_
---       # on (SProxy ∷ SProxy "one") (mul 1)
---       # on (SProxy ∷ SProxy "two") (mul 2)
--- 
---     o = Homogeneous.Variant.homogeneous ((Variant.inj (SProxy ∷ SProxy "one") 1) ∷ Variant (two ∷ Int, one ∷ Int))
---     t = Homogeneous.Variant.homogeneous ((Variant.inj (SProxy ∷ SProxy "two") 2) ∷ Variant (two ∷ Int, one ∷ Int))
--- 
---     t' = t =>> mul'
---     o' = o =>> mul'
--- 
---   logShow $ extract t'
---   logShow $ extract o'
+  assert $ recHeads { a: [1], b: [2,3], c: [] } == { a: Just 1, b: Just 2, c: Nothing }
+
+  recordInstances
+  -- variantInstances
