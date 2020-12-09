@@ -5,12 +5,13 @@ module Data.Homogeneous.Variant
   ) where
 
 import Prelude
+
 import Control.Comonad (class Comonad)
 import Control.Extend (class Extend)
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..), cardinality, fromEnum, pred, succ, toEnum)
 import Data.Homogeneous (class RowSList, class SListRow)
 import Data.Maybe (Maybe)
-import Data.Variant (class VariantBounded, class VariantBoundedEnums, class VariantEqs, class VariantOrds, Variant)
+import Data.Variant (class VariantBounded, class VariantBoundedEnums, class VariantEqs, class VariantOrds, class VariantShows, Variant)
 import Data.Variant.Internal (class VariantTags, VariantRep(..))
 import Prim.RowList (class RowToList)
 import Record.Extra (kind SList)
@@ -57,3 +58,6 @@ instance extendHomogeneous ∷ Extend (Homogeneous r) where
 
 instance comonad ∷ Comonad (Homogeneous r) where
   extract (Homogeneous (VariantRep r)) = r.value
+
+instance showHomogeneous ∷ (SListRow sl a ra, RowSList sl a ra, RowToList ra rl, Show a, VariantTags rl, VariantShows rl) ⇒ Show (Homogeneous sl a) where
+  show v = "Homogeneous (" <> show (toVariant v ∷ Variant ra) <> ")"
