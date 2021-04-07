@@ -1,8 +1,10 @@
 module Data.Homogeneous.Record where
 
 import Prelude
+
 import Data.Foldable (class Foldable, foldr)
 import Data.FoldableWithIndex (class FoldableWithIndex, foldlWithIndex)
+import Data.Generic.Rep (class Generic)
 import Data.Homogeneous (class RowSList, class SListRow)
 import Data.List (catMaybes) as List
 import Data.Maybe (fromJust)
@@ -11,7 +13,7 @@ import Data.Symbol (reflectSymbol)
 import Data.Traversable (class Traversable)
 import Data.Tuple (Tuple(..))
 import Foreign.Object (Object)
-import Foreign.Object (empty, fromFoldable) as Object
+import Foreign.Object (empty, fromFoldable, lookup) as Object
 import Foreign.Object (lookup) as Foreign.Object
 import Partial.Unsafe (unsafePartial)
 import Record.Extra (class Keys, class SListToRowList, type (:::), SLProxy(..), kind SList)
@@ -69,6 +71,8 @@ modify h f = homogeneous (f (toRecord h))
 derive instance eqHomogeneous ∷ Eq a ⇒ Eq (Homogeneous sl a)
 
 derive instance ordHomogeneous ∷ Ord a ⇒ Ord (Homogeneous sl a)
+
+derive instance genericHomogeneous ∷ Generic (Homogeneous sl a) _
 
 derive instance functorHomogeneous ∷ Functor (Homogeneous r)
 

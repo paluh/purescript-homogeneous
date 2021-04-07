@@ -4,15 +4,24 @@ This library exploits the underling representation of the `Record` and `Variant`
 
 ## `Data.Homogeneous.Record`
 
-The core type is:
+The core type ~~is~~ was:
 
   ```purescript
   newtype Homogeneous (row ∷ # Type) a = Homogeneous (Foreign.Object a)
   ```
 
-`row` only provides information about the structure of a `Record` but `a` is the underling type of the values in it. "Smart construction" is done by `Foreign.Object.fromHomogeneous` which is just `unsafeCoerce` underneath. Deconstruction (`Record.Homogeneous.toRecord`) is yet another safe `unsafeCoerce` alias :-P
+now it is (**):
+
+  ```purescript
+  newtype Homogeneous (slist ∷ SList) a = Homogeneous (Foreign.Object a)
+  ```
+
+`SList` provides information about the structure of the `Record` but `a` is the underling type of the values in it. "Smart construction" is done by `Foreign.Object.fromHomogeneous` which is just `unsafeCoerce` underneath. Deconstruction (`Record.Homogeneous.toRecord`) is yet another safe `unsafeCoerce` alias :-P
 
 Given the above we can provide (by mainly newtype derving from the `Object`) many instances for this type like: `Traversable`, `Foldable`, `Monoid`. There is also an `Applicative` instance (inspired by instance from `sized-vectors`).
+
+(**) I've moved to `SList` (heterogeneous list of `Symbol`s) to represent the structure of the given record because it has better inference properties. This is not ideal because when you want to specify label set by hand you should provide them in alphabetical order... ;-)
+
 
 ### Installation
 

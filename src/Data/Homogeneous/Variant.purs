@@ -5,10 +5,12 @@ module Data.Homogeneous.Variant
   ) where
 
 import Prelude
-
 import Control.Comonad (class Comonad)
 import Control.Extend (class Extend)
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..), cardinality, fromEnum, pred, succ, toEnum)
+import Data.Foldable (class Foldable, foldMapDefaultL, foldrDefault)
+import Data.FoldableWithIndex (class FoldableWithIndex, foldMapWithIndexDefaultL, foldrWithIndexDefault)
+import Data.Generic.Rep (class Generic)
 import Data.Homogeneous (class RowSList, class SListRow)
 import Data.Maybe (Maybe)
 import Data.Variant (class VariantBounded, class VariantBoundedEnums, class VariantEqs, class VariantOrds, class VariantShows, Variant)
@@ -26,6 +28,8 @@ toVariant (Homogeneous v) = unsafeCoerce v
 
 homogeneous ∷ ∀ a ra sl. RowSList sl a ra ⇒ (Variant ra → Homogeneous sl a)
 homogeneous = Homogeneous <<< unsafeCoerce
+
+derive instance genericHomogeneous ∷ Generic (Homogeneous sl a) _
 
 instance eqHomogeneous ∷ (SListRow sl a ra, Eq a, RowToList ra rl, VariantTags rl, VariantEqs rl) ⇒ Eq (Homogeneous sl a) where
   eq h1 h2 = eq (toVariant h1) (toVariant h2)
@@ -56,8 +60,18 @@ instance functorHomogeneous ∷ Functor (Homogeneous r) where
 instance extendHomogeneous ∷ Extend (Homogeneous r) where
   extend f h@(Homogeneous (VariantRep r)) = Homogeneous (VariantRep (r { value = f h }))
 
-instance comonad ∷ Comonad (Homogeneous r) where
+instance comonadHomogeneous ∷ Comonad (Homogeneous r) where
   extract (Homogeneous (VariantRep r)) = r.value
+
+instance foldableHomogeneous ∷ Foldable (Homogeneous r) where
+  foldl f z (Homogeneous (VariantRep { value })) = f z value
+  foldr f = foldrDefault f
+  foldMap f = foldMapDefaultL f
+
+instance foldableWithIndexHomogeneous ∷ FoldableWithIndex String (Homogeneous r) where
+  foldlWithIndex f z (Homogeneous (VariantRep { "type": t, value })) = f t z value
+  foldrWithIndex f = foldrWithIndexDefault f
+  foldMapWithIndex f = foldMapWithIndexDefaultL f
 
 instance showHomogeneous ∷ (SListRow sl a ra, RowSList sl a ra, RowToList ra rl, Show a, VariantTags rl, VariantShows rl) ⇒ Show (Homogeneous sl a) where
   show v = "Homogeneous (" <> show (toVariant v ∷ Variant ra) <> ")"
