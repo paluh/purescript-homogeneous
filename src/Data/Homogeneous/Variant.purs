@@ -13,6 +13,7 @@ import Data.FoldableWithIndex (class FoldableWithIndex, foldMapWithIndexDefaultL
 import Data.Generic.Rep (class Generic)
 import Data.Homogeneous (class RowSList, class SListRow)
 import Data.Maybe (Maybe)
+import Data.Semigroup.Foldable (class Foldable1, foldMap1Default)
 import Data.Variant (class VariantBounded, class VariantBoundedEnums, class VariantEqs, class VariantOrds, class VariantShows, Variant)
 import Data.Variant.Internal (class VariantTags, VariantRep(..))
 import Prim.RowList (class RowToList)
@@ -72,6 +73,10 @@ instance foldableWithIndexHomogeneous ∷ FoldableWithIndex String (Homogeneous 
   foldlWithIndex f z (Homogeneous (VariantRep { "type": t, value })) = f t z value
   foldrWithIndex f = foldrWithIndexDefault f
   foldMapWithIndex f = foldMapWithIndexDefaultL f
+
+instance foldable1Homogeneous ∷ Foldable1 (Homogeneous r) where
+  fold1 (Homogeneous (VariantRep { value })) = value
+  foldMap1 f = foldMap1Default f
 
 instance showHomogeneous ∷ (SListRow sl a ra, RowSList sl a ra, RowToList ra rl, Show a, VariantTags rl, VariantShows rl) ⇒ Show (Homogeneous sl a) where
   show v = "Homogeneous (" <> show (toVariant v ∷ Variant ra) <> ")"
