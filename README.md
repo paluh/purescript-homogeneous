@@ -48,17 +48,9 @@ module Test.README where
 
 import Prelude
 
-import Control.Comonad (extract, (=>>))
-import Control.Semigroupoid (composeFlipped)
-import Data.Array (head) as Array
-import Data.Homogeneous.Record (homogeneous, toRecord)
 import Data.Homogeneous.Record (homogeneous, toRecord) as Homogeneous.Record
-import Data.Variant (Variant, case_, on)
-import Data.Variant (inj) as Variant
 import Effect (Effect)
-import Effect.Console (logShow)
 import Test.Assert (assert)
-import Type.Prelude (SProxy(..))
 ```
 
 Let's create two records. The first is our data record the second one (created with `pure`) is a record full of functions (identical in this case `_ * 2`):

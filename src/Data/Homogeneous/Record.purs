@@ -12,9 +12,8 @@ import Data.Semigroup.Foldable (class Foldable1, foldMap1Default)
 import Data.Symbol (reflectSymbol)
 import Data.Traversable (class Traversable)
 import Data.Tuple (Tuple(..))
-import Foreign.Object (Object)
-import Foreign.Object (empty, fromFoldable, lookup) as Object
-import Foreign.Object (lookup) as Foreign.Object
+import Foreign.Object (Object) as Foreign
+import Foreign.Object (empty, fromFoldable, lookup) as Foreign.Object
 import Partial.Unsafe (unsafePartial)
 import Record.Extra (class Keys, class SListToRowList, type (:::), SLProxy(..), kind SList)
 import Record.Extra (slistKeys) as Record.Extra
@@ -23,14 +22,14 @@ import Type.Prelude (class IsSymbol, SProxy(..))
 import Type.Row.Homogeneous (class Homogeneous) as Row
 import Unsafe.Coerce (unsafeCoerce)
 
-objUnsafeGet ∷ ∀ a. String → Object a → a
+objUnsafeGet ∷ ∀ a. String → Foreign.Object a → a
 objUnsafeGet = unsafeCoerce Record.Unsafe.unsafeGet
 
-objUnsafeSet ∷ ∀ a. String → a → Object a → Object a
+objUnsafeSet ∷ ∀ a. String → a → Foreign.Object a → Foreign.Object a
 objUnsafeSet = unsafeCoerce Record.Unsafe.unsafeSet
 
 newtype Homogeneous (row ∷ SList) a
-  = Homogeneous (Object a)
+  = Homogeneous (Foreign.Object a)
 
 homogeneous ∷
   ∀ a ra sl.
@@ -77,7 +76,7 @@ derive instance genericHomogeneous ∷ Generic (Homogeneous sl a) _
 derive instance functorHomogeneous ∷ Functor (Homogeneous r)
 
 instance applyHomogeneousRecord ∷ Apply (Homogeneous r) where
-  apply (Homogeneous hf) (Homogeneous ha) = Homogeneous (foldlWithIndex step Object.empty hf)
+  apply (Homogeneous hf) (Homogeneous ha) = Homogeneous (foldlWithIndex step Foreign.Object.empty hf)
     where
     step key result f = objUnsafeSet key (f (objUnsafeGet key ha)) result
 
@@ -86,7 +85,7 @@ instance applicativeHomogeneousRecord ∷ (SListToRowList slist rl, Keys rl) ⇒
     where
     keys = Record.Extra.slistKeys (SLProxy ∷ SLProxy slist)
 
-    obj = Object.fromFoldable <<< map (flip Tuple a) $ keys
+    obj = Foreign.Object.fromFoldable <<< map (flip Tuple a) $ keys
 
 derive newtype instance foldableHomogeneous ∷ Foldable (Homogeneous r)
 
