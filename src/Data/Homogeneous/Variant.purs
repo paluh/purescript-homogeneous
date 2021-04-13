@@ -5,6 +5,7 @@ module Data.Homogeneous.Variant
   ) where
 
 import Prelude
+
 import Control.Comonad (class Comonad)
 import Control.Extend (class Extend)
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..), cardinality, fromEnum, pred, succ, toEnum)
@@ -18,7 +19,7 @@ import Data.Variant (class VariantBounded, class VariantBoundedEnums, class Vari
 import Data.Variant.Internal (class VariantTags, VariantRep(..))
 import Prim.RowList (class RowToList)
 import Record.Extra (kind SList)
-import Type.Row.Homogeneous (class Homogeneous) as Row
+import Type.Row.Homogeneous (class HomogeneousRowList) as Row
 import Unsafe.Coerce (unsafeCoerce)
 
 newtype Homogeneous (sl ∷ SList) a
@@ -46,7 +47,7 @@ instance boundedHomogeneous ∷ (RowSList sl a ra, SListRow sl a ra, Ord a, RowT
   top = homogeneous (top ∷ Variant ra)
   bottom = homogeneous (bottom ∷ Variant ra)
 
-instance boundedEnumHomogeneous ∷ (Row.Homogeneous ra a, RowSList sl a ra, SListRow sl a ra, Ord a, RowToList ra rl, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ BoundedEnum (Homogeneous sl a) where
+instance boundedEnumHomogeneous ∷ (RowSList sl a ra, SListRow sl a ra, Ord a, RowToList ra rl, Row.HomogeneousRowList rl a, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ BoundedEnum (Homogeneous sl a) where
   cardinality =
     let
       Cardinality c = cardinality ∷ Cardinality (Variant ra)
