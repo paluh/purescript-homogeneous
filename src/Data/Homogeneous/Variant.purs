@@ -1,5 +1,6 @@
 module Data.Homogeneous.Variant
   ( homogeneous
+  , fromSList
   , Homogeneous
   , toVariant
   ) where
@@ -33,7 +34,7 @@ homogeneous = Homogeneous <<< unsafeCoerce
 
 -- | When you have `SList` and `a` at hand and want to unify row
 -- | with them you can use this constructor.
-fromSList ∷ ∀ a ra sl. SListRow sl a ra ⇒ Record ra → Homogeneous sl a
+fromSList ∷ ∀ a ra sl. SListRow sl a ra ⇒ Variant ra → Homogeneous sl a
 fromSList = Homogeneous <<< unsafeCoerce
 
 derive instance genericHomogeneous ∷ Generic (Homogeneous sl a) _
