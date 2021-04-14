@@ -31,6 +31,11 @@ toVariant (Homogeneous v) = unsafeCoerce v
 homogeneous ∷ ∀ a ra sl. RowSList sl a ra ⇒ (Variant ra → Homogeneous sl a)
 homogeneous = Homogeneous <<< unsafeCoerce
 
+-- | When you have `SList` and `a` at hand and want to unify row
+-- | with them you can use this constructor.
+fromSList ∷ ∀ a ra sl. SListRow sl a ra ⇒ Record ra → Homogeneous sl a
+fromSList = Homogeneous <<< unsafeCoerce
+
 derive instance genericHomogeneous ∷ Generic (Homogeneous sl a) _
 
 instance eqHomogeneous ∷ (SListRow sl a ra, Eq a, RowToList ra rl, VariantTags rl, VariantEqs rl) ⇒ Eq (Homogeneous sl a) where

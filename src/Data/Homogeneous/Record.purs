@@ -1,7 +1,13 @@
-module Data.Homogeneous.Record where
+module Data.Homogeneous.Record
+  ( homogeneous
+  , fromSList
+  , Homogeneous
+  , toRecord
+  , modify
+  , get
+  ) where
 
 import Prelude
-
 import Data.Foldable (class Foldable, foldr)
 import Data.FoldableWithIndex (class FoldableWithIndex, foldlWithIndex)
 import Data.Generic.Rep (class Generic)
@@ -31,6 +37,10 @@ objUnsafeSet = unsafeCoerce Record.Unsafe.unsafeSet
 newtype Homogeneous (row ∷ SList) a
   = Homogeneous (Foreign.Object a)
 
+-- | The "usual" constructor when
+-- | `ra` `Row` is known and you
+-- | want to derive `sl` and `a`
+-- | from it.
 homogeneous ∷
   ∀ a ra sl.
   RowSList sl a ra ⇒
@@ -41,6 +51,11 @@ homogeneous r =
     -- | Why this doesn't work? I have no clue.
     -- ((Object.fromHomogeneous (r ∷ { | ra })) ∷ Object a)
     (unsafeCoerce r)
+
+-- | When you have `SList` and `a` at hand and want to unify row
+-- | with them you can use this constructor.
+fromSList ∷ ∀ a ra sl. SListRow sl a ra ⇒ Record ra → Homogeneous sl a
+fromSList = Homogeneous <<< unsafeCoerce
 
 toRecord ∷
   ∀ a ra sl.
