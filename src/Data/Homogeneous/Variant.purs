@@ -18,7 +18,7 @@ import Data.Semigroup.Foldable (class Foldable1, foldMap1Default)
 import Data.Variant (class VariantBounded, class VariantBoundedEnums, class VariantEqs, class VariantOrds, class VariantShows, Variant)
 import Data.Variant.Internal (class VariantTags, VariantRep(..))
 import Prim.RowList (class RowToList)
-import Record.Extra (kind SList)
+import Record.Extra (class SListToRowList, kind SList)
 import Type.Row.Homogeneous (class HomogeneousRowList) as Row
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -47,7 +47,7 @@ instance boundedHomogeneous ∷ (RowSList sl a ra, SListRow sl a ra, Ord a, RowT
   top = homogeneous (top ∷ Variant ra)
   bottom = homogeneous (bottom ∷ Variant ra)
 
-instance boundedEnumHomogeneous ∷ (RowSList sl a ra, SListRow sl a ra, Ord a, RowToList ra rl, Row.HomogeneousRowList rl a, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ BoundedEnum (Homogeneous sl a) where
+instance boundedEnumHomogeneous ∷ (SListToRowList sl rl, RowSList sl a ra, SListRow sl a ra, Ord a, RowToList ra rl, Row.HomogeneousRowList rl a, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ BoundedEnum (Homogeneous sl a) where
   cardinality =
     let
       Cardinality c = cardinality ∷ Cardinality (Variant ra)

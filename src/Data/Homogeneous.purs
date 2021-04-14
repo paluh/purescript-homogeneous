@@ -1,8 +1,9 @@
 module Data.Homogeneous where
 
-import Prim.Row (class Cons, class Union) as Row
+import Prim.Row (class Cons) as Row
 import Prim.RowList (class RowToList)
-import Record.Extra (type (:::), SNil, kind SList)
+import Record.Extra (class SListToRowList, type (:::), SNil, kind SList)
+import Type.Prelude (class TypeEquals, RProxy)
 import Type.Row.Homogeneous (class Homogeneous) as Row
 
 -- | We provide two different versions of constraints
@@ -13,9 +14,9 @@ import Type.Row.Homogeneous (class Homogeneous) as Row
 -- | of the row yet etc.
 class (Row.Homogeneous r a) ⇐ RowSList (sl ∷ SList) a (r ∷ # Type) | r → a sl
 
-instance rowSlist ∷ (Row.Homogeneous r a, RowToList r rl) ⇒ RowSList sl a r
+instance rowSlist ∷ (SListToRowList sl rl, Row.Homogeneous r a, RowToList r rl) ⇒ RowSList sl a r
 
 class SListRow (sl ∷ SList) a (r ∷ # Type) | sl a → r
 
-instance slistRowNil ∷ (Row.Union () () r) ⇒ SListRow SNil a r
-else instance slistRowCons ∷ (Row.Cons h a r_ r, SListRow t a r) ⇒ SListRow (h ::: t) a r
+instance slistRowNil ∷ (TypeEquals (RProxy ()) (RProxy r)) ⇒ SListRow SNil a r
+else instance slistRowCons ∷ (Row.Cons h a r_ r, SListRow t a r_) ⇒ SListRow (h ::: t) a r
