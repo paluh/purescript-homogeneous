@@ -1,10 +1,17 @@
 module Data.Homogeneous where
 
+import Prelude
 import Prim.Row (class Cons) as Row
-import Prim.RowList (class RowToList)
-import Record.Extra (class SListToRowList, type (:::), SNil, kind SList)
+import Prim.RowList (Cons, Nil) as RL
+import Prim.RowList (class RowToList, kind RowList)
 import Type.Prelude (class TypeEquals, RProxy)
 import Type.Row.Homogeneous (class Homogeneous) as Row
+
+class FoldHomogeneous (rl ∷ RowList) a (r ∷ # Type) | rl a → r
+
+instance foldHomogeneousNil ∷ FoldHomogeneous RL.Nil a ()
+
+instance foldHomogeneousCons ∷ (Row.Cons l a ls_ ls, FoldHomogeneous t a ls_) ⇒ FoldHomogeneous (RL.Cons l b t) a ls
 
 -- | We provide two different versions of constraints
 -- | so you can get your homogeneous row
@@ -12,11 +19,15 @@ import Type.Row.Homogeneous (class Homogeneous) as Row
 -- | labels and value type just from row.
 -- | This can be useful when we don't know the type
 -- | of the row yet etc.
-class (Row.Homogeneous r a) ⇐ RowSList (sl ∷ SList) a (r ∷ # Type) | r → a sl
+class HomogeneousRowLabels (r ∷ # Type) a (ls ∷ # Type) | r → a ls
 
-instance rowSlist ∷ (SListToRowList sl rl, Row.Homogeneous r a, RowToList r rl) ⇒ RowSList sl a r
+instance rowSlist ∷ (RowToList r rl, FoldHomogeneous rl Void ls, Row.Homogeneous r a) ⇒ HomogeneousRowLabels r a ls
 
-class SListRow (sl ∷ SList) a (r ∷ # Type) | sl a → r
+class ToHomogeneousRow (ls ∷ # Type) a (r ∷ # Type) | ls a → r
 
-instance slistRowNil ∷ (TypeEquals (RProxy ()) (RProxy r)) ⇒ SListRow SNil a r
-else instance slistRowCons ∷ (Row.Cons h a r_ r, SListRow t a r_) ⇒ SListRow (h ::: t) a r
+instance labelsToRow ∷ (RowToList ls ll, ToHomogeneousRow' ll a r) ⇒ ToHomogeneousRow ls a r
+
+class ToHomogeneousRow' (ll ∷ RowList) a (r ∷ # Type) | ll a → r
+
+instance labelsToRowNil ∷ ToHomogeneousRow' RL.Nil a ()
+else instance labelsToRowCons ∷ (Row.Cons h a r_ r, ToHomogeneousRow' t a r_) ⇒ ToHomogeneousRow' (RL.Cons h b t) a r

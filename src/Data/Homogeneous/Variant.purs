@@ -1,8 +1,8 @@
 module Data.Homogeneous.Variant
   ( homogeneous
-  , fromSList
+  , homogeneous'
   , Homogeneous
-  , toVariant
+  , fromHomogeneous
   ) where
 
 import Prelude
@@ -13,54 +13,53 @@ import Data.Enum (class BoundedEnum, class Enum, Cardinality(..), cardinality, f
 import Data.Foldable (class Foldable, foldMapDefaultL, foldrDefault)
 import Data.FoldableWithIndex (class FoldableWithIndex, foldMapWithIndexDefaultL, foldrWithIndexDefault)
 import Data.Generic.Rep (class Generic)
-import Data.Homogeneous (class RowSList, class SListRow)
+import Data.Homogeneous (class FoldHomogeneous, class HomogeneousRowLabels, class ToHomogeneousRow)
 import Data.Maybe (Maybe)
 import Data.Semigroup.Foldable (class Foldable1, foldMap1Default)
 import Data.Variant (class VariantBounded, class VariantBoundedEnums, class VariantEqs, class VariantOrds, class VariantShows, Variant)
 import Data.Variant.Internal (class VariantTags, VariantRep(..))
 import Prim.RowList (class RowToList)
-import Record.Extra (class SListToRowList, kind SList)
 import Type.Row.Homogeneous (class HomogeneousRowList) as Row
 import Unsafe.Coerce (unsafeCoerce)
 
-newtype Homogeneous (sl ∷ SList) a
+newtype Homogeneous (ls ∷ # Type) a
   = Homogeneous (VariantRep a)
 
-toVariant ∷ ∀ a ra sl. SListRow sl a ra ⇒ Homogeneous sl a → Variant ra
-toVariant (Homogeneous v) = unsafeCoerce v
+fromHomogeneous ∷ ∀ a ra ls. ToHomogeneousRow ls a ra ⇒ Homogeneous ls a → Variant ra
+fromHomogeneous (Homogeneous v) = unsafeCoerce v
 
-homogeneous ∷ ∀ a ra sl. RowSList sl a ra ⇒ (Variant ra → Homogeneous sl a)
+homogeneous ∷ ∀ a ra ls. HomogeneousRowLabels ra a ls ⇒ Variant ra → Homogeneous ls a
 homogeneous = Homogeneous <<< unsafeCoerce
 
--- | When you have `SList` and `a` at hand and want to unify row
--- | with them you can use this constructor.
-fromSList ∷ ∀ a ra sl. SListRow sl a ra ⇒ Variant ra → Homogeneous sl a
-fromSList = Homogeneous <<< unsafeCoerce
+-- | When you have labels `Row` and `a` at hand and want to derive the `Row` itself
+-- | you can use this constructor.
+homogeneous' ∷ ∀ a ra ls. ToHomogeneousRow ls a ra ⇒ Variant ra → Homogeneous ls a
+homogeneous' = Homogeneous <<< unsafeCoerce
 
 derive instance genericHomogeneous ∷ Generic (Homogeneous sl a) _
 
-instance eqHomogeneous ∷ (SListRow sl a ra, Eq a, RowToList ra rl, VariantTags rl, VariantEqs rl) ⇒ Eq (Homogeneous sl a) where
-  eq h1 h2 = eq (toVariant h1) (toVariant h2)
+instance eqHomogeneous ∷ (ToHomogeneousRow ls a ra, Eq a, RowToList ra rl, VariantTags rl, VariantEqs rl) ⇒ Eq (Homogeneous ls a) where
+  eq h1 h2 = eq (fromHomogeneous h1) (fromHomogeneous h2)
 
-instance ordHomogeneous ∷ (SListRow sl a ra, Ord a, RowToList ra rl, VariantTags rl, VariantEqs rl, VariantOrds rl) ⇒ Ord (Homogeneous sl a) where
-  compare h1 h2 = compare (toVariant h1 ∷ Variant ra) (toVariant h2 ∷ Variant ra)
+instance ordHomogeneous ∷ (ToHomogeneousRow ls a ra, Ord a, RowToList ra rl, VariantTags rl, VariantEqs rl, VariantOrds rl) ⇒ Ord (Homogeneous ls a) where
+  compare h1 h2 = compare (fromHomogeneous h1 ∷ Variant ra) (fromHomogeneous h2 ∷ Variant ra)
 
-instance enumHomogeneous ∷ (RowSList sl a ra, SListRow sl a ra, Ord a, RowToList ra rl, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ Enum (Homogeneous sl a) where
-  pred h = homogeneous <$> pred (toVariant h ∷ Variant ra)
-  succ h = homogeneous <$> succ (toVariant h ∷ Variant ra)
+instance enumHomogeneous ∷ (HomogeneousRowLabels ra a ls, ToHomogeneousRow ls a ra, Ord a, RowToList ra rl, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ Enum (Homogeneous ls a) where
+  pred h = homogeneous <$> pred (fromHomogeneous h ∷ Variant ra)
+  succ h = homogeneous <$> succ (fromHomogeneous h ∷ Variant ra)
 
-instance boundedHomogeneous ∷ (RowSList sl a ra, SListRow sl a ra, Ord a, RowToList ra rl, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBounded rl) ⇒ Bounded (Homogeneous sl a) where
+instance boundedHomogeneous ∷ (HomogeneousRowLabels ra a ls, ToHomogeneousRow ls a ra, Ord a, RowToList ra rl, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBounded rl) ⇒ Bounded (Homogeneous ls a) where
   top = homogeneous (top ∷ Variant ra)
   bottom = homogeneous (bottom ∷ Variant ra)
 
-instance boundedEnumHomogeneous ∷ (SListToRowList sl rl, RowSList sl a ra, SListRow sl a ra, Ord a, RowToList ra rl, Row.HomogeneousRowList rl a, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ BoundedEnum (Homogeneous sl a) where
+instance boundedEnumHomogeneous ∷ (FoldHomogeneous rl Void ls, HomogeneousRowLabels ra a ls, ToHomogeneousRow ls a ra, Ord a, RowToList ra rl, Row.HomogeneousRowList rl a, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ BoundedEnum (Homogeneous ls a) where
   cardinality =
     let
       Cardinality c = cardinality ∷ Cardinality (Variant ra)
     in
       Cardinality c
-  fromEnum h = fromEnum ((toVariant h) ∷ Variant ra)
-  toEnum i = (homogeneous ∷ (Variant ra → Homogeneous sl a)) <$> (((toEnum i) ∷ Maybe (Variant ra))) ∷ Maybe (Homogeneous sl a)
+  fromEnum h = fromEnum ((fromHomogeneous h) ∷ Variant ra)
+  toEnum i = (homogeneous ∷ (Variant ra → Homogeneous ls a)) <$> (((toEnum i) ∷ Maybe (Variant ra))) ∷ Maybe (Homogeneous ls a)
 
 instance functorHomogeneous ∷ Functor (Homogeneous r) where
   map f (Homogeneous (VariantRep r)) = Homogeneous (VariantRep r { value = f r.value })
@@ -85,5 +84,5 @@ instance foldable1Homogeneous ∷ Foldable1 (Homogeneous r) where
   fold1 (Homogeneous (VariantRep { value })) = value
   foldMap1 f = foldMap1Default f
 
-instance showHomogeneous ∷ (SListRow sl a ra, RowSList sl a ra, RowToList ra rl, Show a, VariantTags rl, VariantShows rl) ⇒ Show (Homogeneous sl a) where
-  show v = "Homogeneous (" <> show (toVariant v ∷ Variant ra) <> ")"
+instance showHomogeneous ∷ (ToHomogeneousRow ls a ra, HomogeneousRowLabels ls a ra, RowToList ra rl, Show a, VariantTags rl, VariantShows rl) ⇒ Show (Homogeneous ls a) where
+  show v = "Homogeneous (" <> show (fromHomogeneous v ∷ Variant ra) <> ")"

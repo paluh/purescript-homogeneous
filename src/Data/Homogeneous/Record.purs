@@ -1,17 +1,18 @@
 module Data.Homogeneous.Record
   ( homogeneous
-  , fromSList
+  , homogeneous'
   , Homogeneous
-  , toRecord
+  , fromHomogeneous
   , modify
   , get
   ) where
 
 import Prelude
+
 import Data.Foldable (class Foldable, foldr)
 import Data.FoldableWithIndex (class FoldableWithIndex, foldlWithIndex)
 import Data.Generic.Rep (class Generic)
-import Data.Homogeneous (class RowSList, class SListRow)
+import Data.Homogeneous (class HomogeneousRowLabels, class ToHomogeneousRow)
 import Data.List (catMaybes) as List
 import Data.Maybe (fromJust)
 import Data.Semigroup.Foldable (class Foldable1, foldMap1Default)
@@ -21,11 +22,14 @@ import Data.Tuple (Tuple(..))
 import Foreign.Object (Object) as Foreign
 import Foreign.Object (empty, fromFoldable, lookup) as Foreign.Object
 import Partial.Unsafe (unsafePartial)
-import Record.Extra (class Keys, class SListToRowList, type (:::), SLProxy(..), kind SList)
-import Record.Extra (slistKeys) as Record.Extra
+import Prim.RowList (Cons) as RL
+import Prim.RowList (class RowToList)
+import Record.Extra (class Keys)
+import Record.Extra (keysImpl) as Record.Extra
 import Record.Unsafe (unsafeGet, unsafeSet) as Record.Unsafe
 import Type.Prelude (class IsSymbol, SProxy(..))
 import Type.Row.Homogeneous (class Homogeneous) as Row
+import Type.RowList (RLProxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 objUnsafeGet ∷ ∀ a. String → Foreign.Object a → a
@@ -34,7 +38,7 @@ objUnsafeGet = unsafeCoerce Record.Unsafe.unsafeGet
 objUnsafeSet ∷ ∀ a. String → a → Foreign.Object a → Foreign.Object a
 objUnsafeSet = unsafeCoerce Record.Unsafe.unsafeSet
 
-newtype Homogeneous (row ∷ SList) a
+newtype Homogeneous (row ∷ # Type) a
   = Homogeneous (Foreign.Object a)
 
 -- | The "usual" constructor when
@@ -42,45 +46,45 @@ newtype Homogeneous (row ∷ SList) a
 -- | want to derive `sl` and `a`
 -- | from it.
 homogeneous ∷
-  ∀ a ra sl.
-  RowSList sl a ra ⇒
+  ∀ a ra ls.
+  HomogeneousRowLabels ra a ls ⇒
   { | ra } →
-  Homogeneous sl a
+  Homogeneous ls a
 homogeneous r =
   Homogeneous
     -- | Why this doesn't work? I have no clue.
     -- ((Object.fromHomogeneous (r ∷ { | ra })) ∷ Object a)
     (unsafeCoerce r)
 
--- | When you have `SList` and `a` at hand and want to unify row
--- | with them you can use this constructor.
-fromSList ∷ ∀ a ra sl. SListRow sl a ra ⇒ Record ra → Homogeneous sl a
-fromSList = Homogeneous <<< unsafeCoerce
+-- | When you already have `Row` of labels and `a` at hand and want to derive row
+-- | from them you can use this constructor instead.
+homogeneous' ∷ ∀ a ra ls. ToHomogeneousRow ls a ra ⇒ Record ra → Homogeneous ls a
+homogeneous' = Homogeneous <<< unsafeCoerce
 
-toRecord ∷
-  ∀ a ra sl.
-  SListRow sl a ra ⇒
-  Homogeneous sl a →
+fromHomogeneous ∷
+  ∀ a ra ls.
+  ToHomogeneousRow ls a ra ⇒
+  Homogeneous ls a →
   { | ra }
-toRecord (Homogeneous obj) = unsafeCoerce obj
+fromHomogeneous (Homogeneous obj) = unsafeCoerce obj
 
 get ∷
-  ∀ a ra sl.
-  SListRow sl a ra ⇒
-  Homogeneous sl a →
+  ∀ a ra ls.
+  ToHomogeneousRow ls a ra ⇒
+  Homogeneous ls a →
   ({ | ra } → a) →
   a
-get h f = f (toRecord h)
+get h f = f (fromHomogeneous h)
 
 modify ∷
-  ∀ a ra slist.
+  ∀ a ra ls.
   Row.Homogeneous ra a ⇒
-  SListRow slist a ra ⇒
-  RowSList slist a ra ⇒
-  Homogeneous slist a →
+  ToHomogeneousRow ls a ra ⇒
+  HomogeneousRowLabels ra a ls ⇒
+  Homogeneous ls a →
   ({ | ra } → { | ra }) →
-  Homogeneous slist a
-modify h f = homogeneous (f (toRecord h))
+  Homogeneous ls a
+modify h f = homogeneous (f (fromHomogeneous h))
 
 derive instance eqHomogeneous ∷ Eq a ⇒ Eq (Homogeneous sl a)
 
@@ -95,10 +99,10 @@ instance applyHomogeneousRecord ∷ Apply (Homogeneous r) where
     where
     step key result f = objUnsafeSet key (f (objUnsafeGet key ha)) result
 
-instance applicativeHomogeneousRecord ∷ (SListToRowList slist rl, Keys rl) ⇒ Applicative (Homogeneous slist) where
+instance applicativeHomogeneousRecord ∷ (RowToList ls ll, Keys ll) ⇒ Applicative (Homogeneous ls) where
   pure a = Homogeneous obj
     where
-    keys = Record.Extra.slistKeys (SLProxy ∷ SLProxy slist)
+    keys = Record.Extra.keysImpl (RLProxy ∷ RLProxy ll)
 
     obj = Foreign.Object.fromFoldable <<< map (flip Tuple a) $ keys
 
@@ -106,12 +110,12 @@ derive newtype instance foldableHomogeneous ∷ Foldable (Homogeneous r)
 
 derive newtype instance foldableWithIndexHomogeneous ∷ FoldableWithIndex String (Homogeneous r)
 
-instance foldable1Homogeneous ∷ (IsSymbol h, SListToRowList tail rl, Keys rl) ⇒ Foldable1 (Homogeneous (h ::: tail)) where
+instance foldable1Homogeneous ∷ (IsSymbol h, RowToList ls (RL.Cons h a tail), Keys tail) ⇒ Foldable1 (Homogeneous ls) where
   fold1 (Homogeneous obj) =
     let
       key = reflectSymbol (SProxy ∷ SProxy h)
 
-      keys = Record.Extra.slistKeys (SLProxy ∷ SLProxy tail)
+      keys = Record.Extra.keysImpl (RLProxy ∷ RLProxy tail)
 
       h = unsafePartial fromJust (Foreign.Object.lookup key obj)
     in
@@ -122,7 +126,7 @@ derive newtype instance traversableHomogeneous ∷ Traversable (Homogeneous r)
 
 derive newtype instance semigroupHomogeneous ∷ Semigroup a ⇒ Semigroup (Homogeneous r a)
 
-instance monoidHomogeneous ∷ (Keys rl, SListToRowList slist rl, Monoid a) ⇒ Monoid (Homogeneous slist a) where
+instance monoidHomogeneous ∷ (RowToList ls ll, Keys ll, Monoid a) ⇒ Monoid (Homogeneous ls a) where
   mempty = pure mempty
 
 instance showHomogeneous ∷ Show a ⇒ Show (Homogeneous r a) where
