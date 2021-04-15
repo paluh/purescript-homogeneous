@@ -14,11 +14,11 @@
         "output"
     ],
     "dependencies": {
-        "purescript-assert": "^v4.1.0",
-        "purescript-console": "^v4.4.0",
-        "purescript-effect": "^v2.0.1",
-        "purescript-foreign-object": "^v2.0.3",
-        "purescript-psci-support": "^v4.0.0",
-        "purescript-variant": "^v6.0.1"
+        "purescript-assert": "^v5.0.0",
+        "purescript-console": "^v5.0.0",
+        "purescript-effect": "^v3.0.0",
+        "purescript-foreign-object": "^v3.0.0",
+        "purescript-psci-support": "^v5.0.0",
+        "purescript-variant": "^v7.0.2"
     }
 }
