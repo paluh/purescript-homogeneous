@@ -13,7 +13,7 @@ import Data.Enum (class BoundedEnum, class Enum, Cardinality(..), cardinality, f
 import Data.Foldable (class Foldable, foldMapDefaultL, foldrDefault)
 import Data.FoldableWithIndex (class FoldableWithIndex, foldMapWithIndexDefaultL, foldrWithIndexDefault)
 import Data.Generic.Rep (class Generic)
-import Data.Homogeneous (class FoldHomogeneous, class HomogeneousRowLabels, class ToHomogeneousRow)
+import Data.Homogeneous (class ListToHomogeneous, class HomogeneousRowLabels, class ToHomogeneousRow)
 import Data.Maybe (Maybe)
 import Data.Semigroup.Foldable (class Foldable1, foldMap1Default)
 import Data.Variant (class VariantBounded, class VariantBoundedEnums, class VariantEqs, class VariantOrds, class VariantShows, Variant)
@@ -52,7 +52,7 @@ instance boundedHomogeneous ∷ (HomogeneousRowLabels ra a ls, ToHomogeneousRow 
   top = homogeneous (top ∷ Variant ra)
   bottom = homogeneous (bottom ∷ Variant ra)
 
-instance boundedEnumHomogeneous ∷ (FoldHomogeneous rl Void ls, HomogeneousRowLabels ra a ls, ToHomogeneousRow ls a ra, Ord a, RowToList ra rl, Row.HomogeneousRowList rl a, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ BoundedEnum (Homogeneous ls a) where
+instance boundedEnumHomogeneous ∷ (ListToHomogeneous rl Void ls, HomogeneousRowLabels ra a ls, ToHomogeneousRow ls a ra, Ord a, RowToList ra rl, Row.HomogeneousRowList rl a, VariantTags rl, VariantEqs rl, VariantOrds rl, VariantBoundedEnums rl) ⇒ BoundedEnum (Homogeneous ls a) where
   cardinality =
     let
       Cardinality c = cardinality ∷ Cardinality (Variant ra)

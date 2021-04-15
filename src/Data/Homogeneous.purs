@@ -6,11 +6,13 @@ import Prim.RowList (Cons, Nil) as RL
 import Prim.RowList (class RowToList, kind RowList)
 import Type.Row.Homogeneous (class Homogeneous) as Row
 
-class FoldHomogeneous (rl ∷ RowList) a (r ∷ # Type) | rl a → r
+-- | Fold a `RowList` into a row but use `a` type
+-- | to fill all values type.
+class ListToHomogeneous (rl ∷ RowList) a (r ∷ # Type) | rl a → r
 
-instance foldHomogeneousNil ∷ FoldHomogeneous RL.Nil a ()
+instance foldHomogeneousNil ∷ ListToHomogeneous RL.Nil a ()
 
-instance foldHomogeneousCons ∷ (Row.Cons l a ls_ ls, FoldHomogeneous t a ls_) ⇒ FoldHomogeneous (RL.Cons l b t) a ls
+instance foldHomogeneousCons ∷ (Row.Cons l a ls_ ls, ListToHomogeneous t a ls_) ⇒ ListToHomogeneous (RL.Cons l b t) a ls
 
 -- | We provide two different versions of constraints
 -- | so you can get your homogeneous row
@@ -20,7 +22,7 @@ instance foldHomogeneousCons ∷ (Row.Cons l a ls_ ls, FoldHomogeneous t a ls_) 
 -- | of the row yet etc.
 class HomogeneousRowLabels (r ∷ # Type) a (ls ∷ # Type) | r → a ls
 
-instance rowSlist ∷ (RowToList r rl, FoldHomogeneous rl Void ls, Row.Homogeneous r a) ⇒ HomogeneousRowLabels r a ls
+instance rowSlist ∷ (RowToList r rl, ListToHomogeneous rl Void ls, Row.Homogeneous r a) ⇒ HomogeneousRowLabels r a ls
 
 class ToHomogeneousRow (ls ∷ # Type) a (r ∷ # Type) | ls a → r
 
