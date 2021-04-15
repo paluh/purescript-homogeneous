@@ -14,23 +14,6 @@ The core type is:
 
 Given the above we can provide (by mainly newtype derving from the `Object`) many instances for this type like: `Traversable`, `Foldable`, `Monoid`. There is also an `Applicative` instance (inspired by instance from `sized-vectors`).
 
-
-### Installation
-
-`puresrcipt-homogeneous` is not in the package set, and neither is its dependency `purescript-typelevel-eval`. So for now, you'll need to manually add them to your project's `packages.dhall`.
-
-  ```
-  let additions =
-    { homogeneous =
-      { dependencies =
-        [ "foreign-object", "record-extra", "typelevel-eval", "variant" ]
-      , repo = "https://github.com/paluh/purescript-homogeneous.git"
-      , version = "master"
-      }
-    }
-  ```
-
-
 ### Usage
 
 Imports are required as we generate tests from this docs.
