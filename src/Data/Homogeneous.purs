@@ -4,7 +4,6 @@ import Prelude
 import Prim.Row (class Cons) as Row
 import Prim.RowList (Cons, Nil) as RL
 import Prim.RowList (class RowToList, kind RowList)
-import Type.Prelude (class TypeEquals, RProxy)
 import Type.Row.Homogeneous (class Homogeneous) as Row
 
 class FoldHomogeneous (rl ∷ RowList) a (r ∷ # Type) | rl a → r
