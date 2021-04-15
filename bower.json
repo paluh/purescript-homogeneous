@@ -19,8 +19,6 @@
         "purescript-effect": "^v2.0.1",
         "purescript-foreign-object": "^v2.0.3",
         "purescript-psci-support": "^v4.0.0",
-        "purescript-record-extra": "^v3.0.1",
-        "purescript-typelevel-eval": "^v0.4.0",
         "purescript-variant": "^v6.0.1"
     }
 }

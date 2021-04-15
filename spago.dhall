@@ -7,10 +7,8 @@ You can edit this file as you like.
     [ "assert"
     , "console"
     , "effect"
-    , "generics-rep"
     , "foreign-object"
     , "psci-support"
-    , "record-extra"
     , "variant"
     ]
 , name = "homogeneous"

@@ -8,14 +8,12 @@ module Data.Homogeneous.Record
   ) where
 
 import Prelude
-
 import Data.Foldable (class Foldable, foldr)
 import Data.FoldableWithIndex (class FoldableWithIndex, foldlWithIndex)
-import Data.Generic.Rep (class Generic)
-import Data.Homogeneous (class HomogeneousRowLabels, class ToHomogeneousRow)
+import Data.Homogeneous (class HomogeneousRowLabels, class Keys, class ToHomogeneousRow, keysImpl)
 import Data.List (catMaybes) as List
 import Data.Maybe (fromJust)
-import Data.Semigroup.Foldable (class Foldable1, foldMap1Default)
+import Data.Semigroup.Foldable (class Foldable1, foldMap1DefaultL, foldr1Default)
 import Data.Symbol (reflectSymbol)
 import Data.Traversable (class Traversable)
 import Data.Tuple (Tuple(..))
@@ -24,8 +22,6 @@ import Foreign.Object (empty, fromFoldable, lookup) as Foreign.Object
 import Partial.Unsafe (unsafePartial)
 import Prim.RowList (Cons) as RL
 import Prim.RowList (class RowToList)
-import Record.Extra (class Keys)
-import Record.Extra (keysImpl) as Record.Extra
 import Record.Unsafe (unsafeGet, unsafeSet) as Record.Unsafe
 import Type.Prelude (class IsSymbol, SProxy(..))
 import Type.Row.Homogeneous (class Homogeneous) as Row
@@ -38,8 +34,7 @@ objUnsafeGet = unsafeCoerce Record.Unsafe.unsafeGet
 objUnsafeSet ∷ ∀ a. String → a → Foreign.Object a → Foreign.Object a
 objUnsafeSet = unsafeCoerce Record.Unsafe.unsafeSet
 
-newtype Homogeneous (row ∷ # Type) a
-  = Homogeneous (Foreign.Object a)
+newtype Homogeneous (row ∷ Row Type) a = Homogeneous (Foreign.Object a)
 
 -- | The "usual" constructor when
 -- | `ra` `Row` is known and you
@@ -90,8 +85,6 @@ derive instance eqHomogeneous ∷ Eq a ⇒ Eq (Homogeneous sl a)
 
 derive instance ordHomogeneous ∷ Ord a ⇒ Ord (Homogeneous sl a)
 
-derive instance genericHomogeneous ∷ Generic (Homogeneous sl a) _
-
 derive instance functorHomogeneous ∷ Functor (Homogeneous r)
 
 instance applyHomogeneousRecord ∷ Apply (Homogeneous r) where
@@ -102,7 +95,7 @@ instance applyHomogeneousRecord ∷ Apply (Homogeneous r) where
 instance applicativeHomogeneousRecord ∷ (RowToList ls ll, Keys ll) ⇒ Applicative (Homogeneous ls) where
   pure a = Homogeneous obj
     where
-    keys = Record.Extra.keysImpl (RLProxy ∷ RLProxy ll)
+    keys = keysImpl (RLProxy ∷ RLProxy ll)
 
     obj = Foreign.Object.fromFoldable <<< map (flip Tuple a) $ keys
 
@@ -111,16 +104,17 @@ derive newtype instance foldableHomogeneous ∷ Foldable (Homogeneous r)
 derive newtype instance foldableWithIndexHomogeneous ∷ FoldableWithIndex String (Homogeneous r)
 
 instance foldable1Homogeneous ∷ (IsSymbol h, RowToList ls (RL.Cons h a tail), Keys tail) ⇒ Foldable1 (Homogeneous ls) where
-  fold1 (Homogeneous obj) =
+  foldl1 f (Homogeneous obj) =
     let
       key = reflectSymbol (SProxy ∷ SProxy h)
 
-      keys = Record.Extra.keysImpl (RLProxy ∷ RLProxy tail)
+      keys = keysImpl (RLProxy ∷ RLProxy tail)
 
       h = unsafePartial fromJust (Foreign.Object.lookup key obj)
     in
-      foldr append h $ List.catMaybes $ map (flip Foreign.Object.lookup obj) keys
-  foldMap1 f = foldMap1Default f
+      foldr f h $ List.catMaybes $ map (flip Foreign.Object.lookup obj) keys
+  foldr1 f = foldr1Default f
+  foldMap1 f = foldMap1DefaultL f
 
 derive newtype instance traversableHomogeneous ∷ Traversable (Homogeneous r)
 

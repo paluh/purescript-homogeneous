@@ -6,23 +6,21 @@ module Data.Homogeneous.Variant
   ) where
 
 import Prelude
-
 import Control.Comonad (class Comonad)
 import Control.Extend (class Extend)
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..), cardinality, fromEnum, pred, succ, toEnum)
 import Data.Foldable (class Foldable, foldMapDefaultL, foldrDefault)
 import Data.FoldableWithIndex (class FoldableWithIndex, foldMapWithIndexDefaultL, foldrWithIndexDefault)
-import Data.Generic.Rep (class Generic)
 import Data.Homogeneous (class ListToHomogeneous, class HomogeneousRowLabels, class ToHomogeneousRow)
 import Data.Maybe (Maybe)
-import Data.Semigroup.Foldable (class Foldable1, foldMap1Default)
+import Data.Semigroup.Foldable (class Foldable1, foldMap1DefaultL, foldr1Default)
 import Data.Variant (class VariantBounded, class VariantBoundedEnums, class VariantEqs, class VariantOrds, class VariantShows, Variant)
 import Data.Variant.Internal (class VariantTags, VariantRep(..))
 import Prim.RowList (class RowToList)
 import Type.Row.Homogeneous (class HomogeneousRowList) as Row
 import Unsafe.Coerce (unsafeCoerce)
 
-newtype Homogeneous (ls ∷ # Type) a
+newtype Homogeneous (ls ∷ Row Type) a
   = Homogeneous (VariantRep a)
 
 fromHomogeneous ∷ ∀ a ra ls. ToHomogeneousRow ls a ra ⇒ Homogeneous ls a → Variant ra
@@ -35,8 +33,6 @@ homogeneous = Homogeneous <<< unsafeCoerce
 -- | you can use this constructor.
 homogeneous' ∷ ∀ a ra ls. ToHomogeneousRow ls a ra ⇒ Variant ra → Homogeneous ls a
 homogeneous' = Homogeneous <<< unsafeCoerce
-
-derive instance genericHomogeneous ∷ Generic (Homogeneous sl a) _
 
 instance eqHomogeneous ∷ (ToHomogeneousRow ls a ra, Eq a, RowToList ra rl, VariantTags rl, VariantEqs rl) ⇒ Eq (Homogeneous ls a) where
   eq h1 h2 = eq (fromHomogeneous h1) (fromHomogeneous h2)
@@ -81,8 +77,9 @@ instance foldableWithIndexHomogeneous ∷ FoldableWithIndex String (Homogeneous 
   foldMapWithIndex f = foldMapWithIndexDefaultL f
 
 instance foldable1Homogeneous ∷ Foldable1 (Homogeneous r) where
-  fold1 (Homogeneous (VariantRep { value })) = value
-  foldMap1 f = foldMap1Default f
+  foldl1 _ (Homogeneous (VariantRep { value })) = value
+  foldr1 v = foldr1Default v
+  foldMap1 f = foldMap1DefaultL f
 
 instance showHomogeneous ∷ (ToHomogeneousRow ls a ra, HomogeneousRowLabels ls a ra, RowToList ra rl, Show a, VariantTags rl, VariantShows rl) ⇒ Show (Homogeneous ls a) where
   show v = "Homogeneous (" <> show (fromHomogeneous v ∷ Variant ra) <> ")"
