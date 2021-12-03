@@ -1,6 +1,6 @@
 # purescript-homogeneous
 
-This library exploits the underling representation of the `Record` and `Variant` to provide a convenient instances when they are homogeneous (all fields or all cases have the same type).
+This library exploits the underling representation of the `Record` and `Variant` when they are homogeneous (all fields / cases have the same type) to provide a convenient instances for them (like `Functor`, `Apply`, `Foldable`, `Traversable`).
 
 ## `Data.Homogeneous.Record`
 
