@@ -23,9 +23,9 @@ import Partial.Unsafe (unsafePartial)
 import Prim.RowList (Cons) as RL
 import Prim.RowList (class RowToList)
 import Record.Unsafe (unsafeGet, unsafeSet) as Record.Unsafe
-import Type.Prelude (class IsSymbol, SProxy(..))
+import Data.Symbol (class IsSymbol)
 import Type.Row.Homogeneous (class Homogeneous) as Row
-import Type.RowList (RLProxy(..))
+import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 objUnsafeGet ∷ ∀ a. String → Foreign.Object a → a
@@ -95,7 +95,7 @@ instance applyHomogeneousRecord ∷ Apply (Homogeneous r) where
 instance applicativeHomogeneousRecord ∷ (RowToList ls ll, Keys ll) ⇒ Applicative (Homogeneous ls) where
   pure a = Homogeneous obj
     where
-    keys = keysImpl (RLProxy ∷ RLProxy ll)
+    keys = keysImpl (Proxy ∷ Proxy ll)
 
     obj = Foreign.Object.fromFoldable <<< map (flip Tuple a) $ keys
 
@@ -106,9 +106,9 @@ derive newtype instance foldableWithIndexHomogeneous ∷ FoldableWithIndex Strin
 instance foldable1Homogeneous ∷ (IsSymbol h, RowToList ls (RL.Cons h a tail), Keys tail) ⇒ Foldable1 (Homogeneous ls) where
   foldl1 f (Homogeneous obj) =
     let
-      key = reflectSymbol (SProxy ∷ SProxy h)
+      key = reflectSymbol (Proxy ∷ Proxy h)
 
-      keys = keysImpl (RLProxy ∷ RLProxy tail)
+      keys = keysImpl (Proxy ∷ Proxy tail)
 
       h = unsafePartial fromJust (Foreign.Object.lookup key obj)
     in

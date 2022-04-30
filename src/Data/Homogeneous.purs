@@ -6,8 +6,9 @@ import Data.List (List, (:))
 import Prim.Row (class Cons) as Row
 import Prim.RowList (Cons, Nil) as RL
 import Prim.RowList (class RowToList, RowList)
-import Type.Prelude (class IsSymbol, RLProxy(..), SProxy(..), reflectSymbol)
+import Data.Symbol (class IsSymbol, reflectSymbol)
 import Type.Row.Homogeneous (class Homogeneous) as Row
+import Type.Proxy (Proxy(..))
 
 -- | Fold a `RowList` into a row but use `a` type
 -- | to fill all values type.
@@ -44,7 +45,7 @@ else instance labelsToRowCons ∷ (Row.Cons h a r_ r, ToHomogeneousRow' t a r_) 
 -- | Reflect row list labels into a `List String`.
 -- | Taken from `record-extra`.
 class Keys (xs ∷ RowList Type) where
-  keysImpl ∷ RLProxy xs → List String
+  keysImpl ∷ Proxy xs → List String
 
 instance nilKeys ∷ Keys RL.Nil where
   keysImpl _ = mempty
@@ -56,6 +57,6 @@ instance consKeys ::
   Keys (RL.Cons name ty tail) where
   keysImpl _ = first : rest
     where
-    first = reflectSymbol (SProxy ∷ SProxy name)
+    first = reflectSymbol (Proxy ∷ Proxy name)
 
-    rest = keysImpl (RLProxy ∷ RLProxy tail)
+    rest = keysImpl (Proxy ∷ Proxy tail)
