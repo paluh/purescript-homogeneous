@@ -119,10 +119,31 @@ let additions =
 
 
 let upstream =
-      https://github.com/purescript/package-sets/releases/download/psc-0.14.0-20210406/packages.dhall sha256:7b6af643c2f61d936878f58b613fade6f3cb39f2b4a310f6095784c7b5285879
+      https://github.com/purescript/package-sets/releases/download/psc-0.15.0-20220429/packages.dhall
+        sha256:03c682bff56fc8f9d8c495ffcc6f524cbd3c89fe04778f965265c08757de8c9d
 
 let overrides = {=}
 
-let additions = {=}
-
+let additions =
+      { variant =
+        { dependencies =
+          [  "assert"
+  , "control"
+  , "effect"
+  , "either"
+  , "enums"
+  , "foldable-traversable"
+  , "lists"
+  , "maybe"
+  , "partial"
+  , "prelude"
+  , "record"
+  , "tuples"
+  , "type-equality"
+  , "unsafe-coerce"
+          ]
+        , repo = "https://github.com/natefaubion/purescript-variant.git"
+        , version = "v8.0.0"
+        }
+      }
 in  upstream // overrides // additions
